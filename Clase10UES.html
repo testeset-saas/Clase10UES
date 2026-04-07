@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taller Interactivo: Clase 10 - Seguridad Web</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Fira+Code:wght@400;500&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+        
+        code, pre {
+            font-family: 'Fira Code', monospace;
+        }
+        
+        .container-main {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 4rem 3rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255,255,255,0.03) 10px,
+                rgba(255,255,255,0.03) 20px
+            );
+            animation: scan 20s linear infinite;
+        }
+        
+        @keyframes scan {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50%, 50%); }
+        }
+        
+        .section {
+            padding: 3rem;
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .section-header i {
+            font-size: 2rem;
+            margin-right: 1rem;
+            color: #667eea;
+        }
+        
+        .card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        }
+        
+        .alert-danger {
+            background: #fee;
+            border-left: 4px solid #dc2626;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+        }
+        
+        .alert-warning {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+        }
+        
+        .alert-info {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+        }
+        
+        .alert-success {
+            background: #f0fdf4;
+            border-left: 4px solid #10b981;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+        }
+        
+        .interactive-scenario {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+        
+        .scenario-badge {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        .btn-option {
+            background: white;
+            border: 2px solid #e5e7eb;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            font-weight: 500;
+        }
+        
+        .btn-option:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+            transform: translateX(5px);
+        }
+        
+        .btn-option.correct {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        
+        .btn-option.incorrect {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+        
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+        
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            margin: 0.75rem 0;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        
+        .checklist-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+        
+        .checklist-item input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            margin-right: 1rem;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        
+        .cve-card {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .cve-header {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fbbf24;
+            margin-bottom: 1rem;
+        }
+        
+        .severity-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+        }
+        
+        .severity-critical {
+            background: #dc2626;
+            color: white;
+        }
+        
+        .severity-high {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .analogy-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .analogy-item {
+            text-align: center;
+            padding: 2rem;
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .analogy-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+        
+        .vs-divider {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #dc2626;
+            padding: 0 1rem;
+        }
+        
+        .stat-box {
+            background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            margin: 1rem;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 3rem;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #667eea;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.35rem;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #667eea;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #667eea;
+        }
+        
+        .reference-link {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px dotted #3b82f6;
+            transition: all 0.3s ease;
+        }
+        
+        .reference-link:hover {
+            color: #1d4ed8;
+            border-bottom-style: solid;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container-main {
+                box-shadow: none;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-main">
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div style="position: relative; z-index: 1;">
+                <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem;">
+                    <i class="fas fa-shield-alt"></i> Taller Interactivo: Clase 10
+                </h1>
+                <h2 style="font-size: 2rem; font-weight: 600; margin-bottom: 1rem;">
+                    Seguridad de Aplicaciones Web
+                </h2>
+                <p style="font-size: 1.25rem; opacity: 0.9; max-width: 800px; margin: 0 auto;">
+                    Del Perímetro a la Lógica: Dominando OWASP Top 10:2025 y Broken Access Control
+                </p>
+                <div style="margin-top: 2rem; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                    <span style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 20px;">
+                        <i class="fas fa-calendar"></i> 2025
+                    </span>
+                    <span style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 20px;">
+                        <i class="fas fa-code"></i> OWASP Top 10
+                    </span>
+                    <span style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 20px;">
+                        <i class="fas fa-bug"></i> Casos Reales
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 1: Analogía Fundamental -->
+        <div class="section" style="background: #f8fafc;">
+            <div class="section-header">
+                <i class="fas fa-lightbulb"></i>
+                <h2 style="font-size: 2rem; font-weight: 700; margin: 0;">Concepto Fundamental</h2>
+            </div>
+
+            <div class="card" style="background: white; border-left-color: #10b981;">
+                <h3 style="font-size: 1.75rem; font-weight: 700; color: #1e293b; margin-bottom: 1.5rem;">
+                    La Analogía del Edificio Corporativo
+                </h3>
+                
+                <div class="analogy-box">
+                    <div class="analogy-item">
+                        <i class="fas fa-door-closed analogy-icon"></i>
+                        <h4 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">
+                            LA RED
+                        </h4>
+                        <p style="font-size: 1.125rem; color: #64748b;">
+                            Controla <strong>QUIÉN ENTRA</strong>
+                        </p>
+                        <div style="background: #e0f2fe; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                            <p style="font-size: 0.875rem; color: #0c4a6e;">
+                                <strong>Ejemplos:</strong><br>
+                                • Firewalls<br>
+                                • VPNs<br>
+                                • WAF (Web Application Firewall)<br>
+                                • Controles de Acceso de Red
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="vs-divider">≠</div>
+                    
+                    <div class="analogy-item">
+                        <i class="fas fa-user-lock analogy-icon"></i>
+                        <h4 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">
+                            LA APLICACIÓN
+                        </h4>
+                        <p style="font-size: 1.125rem; color: #64748b;">
+                            Controla <strong>QUÉ PUEDE HACER</strong>
+                        </p>
+                        <div style="background: #fef3c7; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                            <p style="font-size: 0.875rem; color: #78350f;">
+                                <strong>Ejemplos:</strong><br>
+                                • Control de Acceso Basado en Roles<br>
+                                • Validación de Lógica de Negocio<br>
+                                • Autorización de Recursos<br>
+                                • Verificación de Permisos
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert-danger">
+                    <h4 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem;">
+                        <i class="fas fa-exclamation-triangle"></i> El Problema Crítico
+                    </h4>
+                    <p style="font-size: 1rem; line-height: 1.6;">
+                        <strong>Un WAF o VPN perfecto solo garantiza que el usuario es quien dice ser, pero NO controla qué acciones puede realizar dentro de la aplicación.</strong> Esta es la razón por la que el 100% de las aplicaciones probadas en 2025 tienen alguna forma de Broken Access Control según <a href="https://owasp.org/Top10/2025/A01_2025-Broken_Access_Control/" class="reference-link" target="_blank">OWASP Top 10</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: OWASP Top 10:2025 -->
+        <div class="section">
+            <div class="section-header">
+                <i class="fas fa-list-ol"></i>
+                <h2 style="font-size: 2rem; font-weight: 700; margin: 0;">OWASP Top 10:2025 - Panorama General</h2>
+            </div>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+                <div class="stat-box">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Aplicaciones con Broken Access Control</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">#1</div>
+                    <div class="stat-label">Posición en OWASP Top 10</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">Máx</div>
+                    <div class="stat-label">Ocurrencias Reportadas</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 1.5rem;">
+                    <i class="fas fa-trophy" style="color: #fbbf24;"></i> A01:2025 - Broken Access Control
+                </h3>
+                
+                <p style="font-size: 1rem; line-height: 1.8; color: #475569; margin-bottom: 1.5rem;">
+                    El control de acceso aplica políticas para que los usuarios no puedan actuar fuera de sus permisos previstos. Las fallas generalmente conducen a divulgación no autorizada de información, modificación o destrucción de todos los datos, o ejecución de funciones comerciales fuera de los límites del usuario.
+                </p>
+
+                <div class="alert-warning">
+                    <h4 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.75rem;">
+                        <i class="fas fa-chart-line"></i> Estadísticas Alarmantes
+                    </h4>
+                    <ul style="margin: 0; padding-left: 1.5rem;">
+                        <li style="margin: 0.5rem 0;"><strong>94%</strong> de las aplicaciones presentan alguna forma de debilidad en el control de acceso</li>
+                        <li style="margin: 0.5rem 0;">Es la categoría con el <strong>mayor número de CVEs relacionados</strong></li>
+                        <li style="margin: 0.5rem 0;">Promedio de <strong>318,000</strong> instancias de CWEs en esta categoría</li>
+                    </ul>
+                    <p style="margin-top: 1rem; font-size: 0.875rem;">
+                        Fuente: <a href="https://owasp.org/Top10/2025/A01_2025-Broken_Access_Control/" class="reference-link" target="_blank">OWASP Top 10:2025</a>
+                    </p>
+                </div>
+
+                <h4 style="font-size: 1.25rem; font-weight: 700; color: #1e293b; margin: 2rem 0 1rem 0;">
+                    Vulnerabilidades Comunes:
+                </h4>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                    <div style="background: #fef2f2; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #dc2626;">
+                        <h5 style="font-weight: 700; margin-bottom: 0.5rem;"><i class="fas fa-key"></i> Violación del Principio de Menor Privilegio</h5>
+                        <p style="font-size: 0.875rem; color: #991b1b;">Permitir por defecto en lugar de denegar</p>
+                    </div>
+                    
+                    <div style="background: #fef2f2; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #dc2626;">
+                        <h5 style="font-weight: 700; margin-bottom: 0.5rem;"><i class="fas fa-link"></i> IDOR - Insecure Direct Object Reference</h5>
+                        <p style="font-size: 0.875rem; color: #991b1b;">Ver o editar cuentas ajenas mediante ID</p>
+                    </div>
+                    
+                    <div style="background: #fef2f2; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #dc2626;">
+                        <h5 style="font-weight: 700; margin-bottom: 0.5rem;"><i class="fas fa-arrow-up"></i> Elevación de Privilegios</h5>
+                        <p style="font-size: 0.875rem; color: #991b1b;">Actuar como admin sin credenciales</p>
+                    </div>
+                    
+                    <div style="background: #fef2f2; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #dc2626;">
+                        <h5 style="font-weight: 700; margin-bottom: 0.5rem;"><i class="fas fa-code"></i> API sin Controles</h5>
+                        <p style="font-size: 0.875rem; color: #991b1b;">POST, PUT, DELETE sin verificación</p>
+                    </div>
+                    
+                    <div style="background: #fef2f2; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #dc2626;">
+                        <h5 style="font-weight: 700; margin-bottom: 0.5rem;"><i class="fas fa-edit"></i> Manipulación de Metadata</h5>
+                        <p style="font-size: 0.875rem; color: #991b1b;">Replay/tampering de JWT o cookies</p>
+                    </div>
+                    
+                    <div style="background: #fef2f2; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #dc2626;">
+                        <h5 style="font-weight: 700; margin-bottom: 0.5rem;"><i class="fas fa-globe"></i> Misconfiguración CORS</h5>
+                        <p style="font-size: 0.875rem; color: #991b1b;">Acceso API desde orígenes no autorizados</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: El Desafío del WAF - Caso Real 2025 -->
+        <div class="section" style="background: #f8fafc;">
+            <div class="section-header">
+                <i class="fas fa-fire"></i>
+                <h2 style="font-size: 2rem; font-weight: 700; margin: 0;">El Desafío del WAF: Caso Real 2025</h2>
+            </div>
+
+            <div class="card" style="background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%); color: white;">
+                <h3 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 1rem; color: #fbbf24;">
+                    <i class="fas fa-skull-crossbones"></i> Account Takeover mediante WAF Bypass + Business Logic Flaw
+                </h3>
+                
+                <div style="background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    <p style="font-size: 0.875rem; margin-bottom: 0.5rem;">
+                        <strong>Objetivo:</strong> Plataforma SaaS de E-commerce
+                    </p>
+                    <p style="font-size: 0.875rem; margin-bottom: 0.5rem;">
+                        <strong>Fecha:</strong> 2025
+                    </p>
+                    <p style="font-size: 0.875rem; margin-bottom: 0;">
+                        <strong>Fuente:</strong> <a href="https://medium.com/@ghostxploiter/waf-bypass-xss-business-logic-flaw-account-takeover-04577cb53b18" class="reference-link" style="color: #93c5fd;" target="_blank">Medium - GhostXploiter</a>
+                    </p>
+                </div>
+
+                <h4 style="font-size: 1.25rem; font-weight: 700; margin: 1.5rem 0 1rem 0; color: #fbbf24;">
+                    ¿Por qué el WAF no lo detuvo?
+                </h4>
+                
+                <p style="font-size: 1rem; line-height: 1.8; margin-bottom: 1.5rem;">
+                    El WAF estaba configurado para detectar patrones de ataques conocidos (XSS tradicional), pero los atacantes utilizaron <strong>tres vectores que el WAF no puede prevenir por sí solo</strong>:
+                </p>
+
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <h5 style="font-weight: 700; font-size: 1.125rem; margin-bottom: 0.5rem; color: #fbbf24;">
+                            1. Reflected XSS mediante Comment Injection
+                        </h5>
+                        <p style="font-size: 0.875rem; line-height: 1.6; margin-bottom: 0.5rem;">
+                            El path de la URL se reflejaba dentro de comentarios HTML sin sanitización adecuada.
+                        </p>
+                        <div class="code-block" style="background: #0f172a; font-size: 0.75rem;">
+&lt;!-- Path: /dashboard/../../<span style="color: #f87171;">--&gt;&lt;script&gt;malicious_code&lt;/script&gt;&lt;!--</span> --&gt;</div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <h5 style="font-weight: 700; font-size: 1.125rem; margin-bottom: 0.5rem; color: #fbbf24;">
+                            2. WAF Bypass mediante Encoding + Syntax Alternative
+                        </h5>
+                        <p style="font-size: 0.875rem; line-height: 1.6; margin-bottom: 0.5rem;">
+                            El WAF bloqueaba el carácter punto (.), pero no detectaba notación de corchetes:
+                        </p>
+                        <div class="code-block" style="background: #0f172a; font-size: 0.75rem;">
+// Bloqueado por WAF:
+fetch('api/user/profile', {method: 'PATCH', body: JSON.stringify({<span style="color: #f87171;">email</span>: attacker@evil.com})})
+
+// Bypass exitoso:
+<span style="color: #10b981;">'+fetch('api/user/profile',{method:'PATCH',body:JSON['stringify']({email:attacker@evil['com']})})+</span></div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <h5 style="font-weight: 700; font-size: 1.125rem; margin-bottom: 0.5rem; color: #fbbf24;">
+                            3. Business Logic Flaw - Email Collision
+                        </h5>
+                        <p style="font-size: 0.875rem; line-height: 1.6; margin-bottom: 0.5rem;">
+                            <strong>Este es el fallo que ningún WAF puede prevenir:</strong>
+                        </p>
+                        <ul style="font-size: 0.875rem; padding-left: 1.5rem; margin: 0.5rem 0;">
+                            <li>La aplicación permitía múltiples cuentas con el mismo email</li>
+                            <li>Al solicitar password reset, generaba token para la cuenta con <strong>ID más alto</strong></li>
+                            <li>El atacante cambiaba el email de la víctima al suyo propio</li>
+                            <li>Solicitaba reset y recibía el token destinado a la víctima</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="background: #991b1b; padding: 1.5rem; border-radius: 8px; margin-top: 2rem;">
+                    <h4 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.75rem;">
+                        <i class="fas fa-graduation-cap"></i> Lección Crítica
+                    </h4>
+                    <p style="font-size: 1rem; line-height: 1.6; margin: 0;">
+                        <strong>El WAF protegió el perímetro, pero no pudo validar la lógica de negocio.</strong> La aplicación asumió que si un usuario estaba autenticado y pasaba el WAF, entonces su solicitud era legítima. Este es un ejemplo perfecto de por qué "sanitizar entradas NO corrige lógica rota".
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Simulación Interactiva -->
+        <div class="section">
+            <div class="section-header">
+                <i class="fas fa-gamepad"></i>
+                <h2 style="font-size: 2rem; font-weight: 700; margin: 0;">Simulación Interactiva: Encuentra la Vulnerabilidad</h2>
+            </div>
+
+            <div class="alert-info" style="margin-bottom: 2rem;">
+                <p style="font-size: 1rem; line-height: 1.6; margin: 0;">
+                    <strong><i class="fas fa-info-circle"></i> Instrucciones:</strong> Lee cada escenario y clasifica el tipo de fallo como <strong>Implementación</strong>, <strong>Configuración</strong>, o <strong>Diseño</strong>. Haz clic en tu respuesta para verificar.
+                </p>
+            </div>
+
+            <!-- Scenario 1 -->
+            <div class="interactive-scenario">
+                <div class="scenario-badge">Escenario 1</div>
+                <h3 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem; padding-top: 1rem;">
+                    <i class="fas fa-database"></i> Inyección SQL en Login
+                </h3>
+                <div class="code-block" style="margin: 1.5rem 0;">
+String query = "SELECT * FROM users WHERE username='" + <span style="color: #f87171;">username</span> + "' AND password='" + <span style="color: #f87171;">password</span> + "'";
+ResultSet rs = statement.executeQuery(query);</div>
+                <p style="font-size: 1rem; color: #475569; margin-bottom: 1.5rem;">
+                    Un atacante puede ingresar <code style="background: #1e293b; color: #e2e8f0; padding: 0.25rem 0.5rem; border-radius: 4px;">admin' OR '1'='1</code> como username y bypassear la autenticación.
+                </p>
+                <p style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem;">¿Qué tipo de fallo es este?</p>
+                <div>
+                    <button class="btn-option" onclick="checkAnswer(1, 'implementacion', this)">
+                        <i class="fas fa-code"></i> Fallo de Implementación
+                    </button>
+                    <button class="btn-option" onclick="checkAnswer(1, 'configuracion', this)">
+                        <i class="fas fa-cog"></i> Fallo de Configuración
+                    </button>
+                    <button class="btn-option" onclick="checkAnswer(1, 'diseno', this)">
+                        <i class="fas fa-drafting-compass"></i> Fallo de Diseño
+                    </button>
+                </div>
+                <div id="feedback1" style="margin-top: 1rem; display: none;"></div>
+            </div>
+
+            <!-- Scenario 2 -->
+            <div class="interactive-scenario">
+                <div class="scenario-badge">Escenario 2</div>
+                <h3 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem; padding-top: 1rem;">
+                    <i class="fas fa-receipt"></i> IDs Secuenciales en Facturas
+                </h3>
+                <div class="code-block" style="margin: 1.5rem 0;">
+GET /api/invoice/<span style="color: #fbbf24;">12345</span>
+Response: {
+  "invoice_id": 12345,
+  "customer": "Juan Pérez",
+  "amount": 5000,
+  "items": [...]
+}</div>
+                <p style="font-size: 1rem; color: #475569; margin-bottom: 1.5rem;">
+                    Las facturas usan IDs secuenciales predecibles. Un usuario puede cambiar el ID en la URL (<code style="background: #1e293b; color: #e2e8f0; padding: 0.25rem 0.5rem; border-radius: 4px;">/api/invoice/12346</code>) y ver facturas de otros clientes. No hay validación de propiedad.
+                </p>
+                <p style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem;">¿Qué tipo de fallo es este?</p>
+                <div>
+                    <button class="btn-option" onclick="checkAnswer(2, 'implementacion', this)">
+                        <i class="fas fa-code"></i> Fallo de Implementación
+                    </button>
+                    <button class="btn-option" onclick="checkAnswer(2, 'configuracion', this)">
+                        <i class="fas fa-cog"></i> Fallo de Configuración
+                    </button>
+                    <button class="btn-option" onclick="checkAnswer(2, 'diseno', this)">
+                        <i class="fas fa-drafting-compass"></i> Fallo de Diseño
+                    </button>
+                </div>
+                <div id="feedback2" style="margin-top: 1rem; display: none;"></div>
+            </div>
+
+            <!-- Scenario 3 -->
+            <div class="interactive-scenario">
+                <div class="scenario-badge">Escenario 3</div>
+                <h3 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem; padding-top: 1rem;">
+                    <i class="fas fa-sign-in-alt"></i> Falta de Alertas en Intentos de Login
+                </h3>
+                <p style="font-size: 1rem; color: #475569; margin-bottom: 1.5rem;">
+                    La aplicación no tiene configurado ningún sistema de monitoreo o alertas. Un atacante puede realizar <strong>1,000 intentos de login fallidos</strong> en 10 minutos sin que nadie lo detecte. No hay rate limiting, logging centralizado, ni notificaciones de seguridad activadas.
+                </p>
+                <p style="font-size: 1rem; color: #475569; margin-bottom: 1.5rem;">
+                    El código de autenticación es seguro (usa bcrypt, prepared statements), pero nadie supervisa los eventos de seguridad.
+                </p>
+                <p style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem;">¿Qué tipo de fallo es este?</p>
+                <div>
+                    <button class="btn-option" onclick="checkAnswer(3, 'implementacion', this)">
+                        <i class="fas fa-code"></i> Fallo de Implementación
+                    </button>
+                    <button class="btn-option" onclick="checkAnswer(3, 'configuracion', this)">
+                        <i class="fas fa-cog"></i> Fallo de Configuración
+                    </button>
+                    <button class="btn-option" onclick="checkAnswer(3, 'diseno', this)">
+                        <i class="fas fa-drafting-compass"></i> Fallo de Diseño
+                    </button>
+                </div>
+                <div id="feedback3" style="margin-top: 1rem; display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Section 5: Laboratorio Juice Shop -->
+        <div class="section" style="background: #f8fafc;">
+            <div class="section-header">
+                <i class="fas fa-flask"></i>
+                <h2 style="font-size: 2rem; font-weight: 700; margin: 0;">Guía de Laboratorio: Explotando IDOR en Juice Shop</h2>
+            </div>
+
+            <div class="alert-info" style="margin-bottom: 2rem;">
+                <h4 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.75rem;">
+                    <i class="fas fa-graduation-cap"></i> Objetivo del Laboratorio
+                </h4>
+                <p style="margin: 0; font-size: 1rem; line-height: 1.6;">
+                    Aprenderás a identificar y explotar una vulnerabilidad IDOR (Insecure Direct Object Reference) real en OWASP Juice Shop, comprendiendo cómo los atacantes pueden acceder a datos de otros usuarios simplemente modificando parámetros en la URL.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 1.5rem;">
+                    <i class="fas fa-shopping-basket"></i> Challenge: Acceder a Carritos de Otros Usuarios
+                </h3>
+
+                <div class="alert-warning" style="margin-bottom: 2rem;">
+                    <p style="margin: 0; font-size: 0.875rem;">
+                        <strong><i class="fas fa-exclamation-triangle"></i> Prerequisitos:</strong> Instala OWASP Juice Shop y configura un proxy web (Burp Suite o OWASP ZAP). 
+                        Más información: <a href="https://thehackerish.com/how-to-install-owasp-juice-shop" class="reference-link" target="_blank">How to Install Juice Shop</a>
+                    </p>
+                </div>
+
+                <h4 style="font-size: 1.25rem; font-weight: 700; margin: 2rem 0 1rem 0; color: #1e293b;">
+                    Pasos Detallados:
+                </h4>
+
+                <div style="margin: 2rem 0;">
+                    <div style="display: flex; align-items: flex-start; margin-bottom: 2rem;">
+                        <div class="step-number">1</div>
+                        <div style="flex: 1;">
+                            <h5 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.75rem;">
+                                Configurar el Proxy Web
+                            </h5>
+                            <p style="font-size: 0.875rem; color: #475569; line-height: 1.6;">
+                                Inicia Burp Suite o OWASP ZAP y configura tu navegador para usar el proxy (típicamente <code style="background: #1e293b; color: #e2e8f0; padding: 0.25rem 0.5rem; border-radius: 4px;">127.0.0.1:8080</code>). Activa la intercepción de tráfico HTTP.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: flex-start; margin-bottom: 2rem;">
+                        <div class="step-number">2</div>
+                        <div style="flex: 1;">
+                            <h5 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.75rem;">
+                                Iniciar Sesión y Agregar Productos
+                            </h5>
+                            <p style="font-size: 0.875rem; color: #475569; line-height: 1.6;">
+                                Crea una cuenta en Juice Shop e inicia sesión. Agrega varios productos a tu carrito de compras.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: flex-start; margin-bottom: 2rem;">
+                        <div class="step-number">3</div>
+                        <div style="flex: 1;">
+                            <h5 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.75rem;">
+                                Capturar la Request del Carrito
+                            </h5>
+                            <p style="font-size: 0.875rem; color: #475569; line-height: 1.6; margin-bottom: 0.75rem;">
+                                Haz clic en el icono del carrito (esquina superior derecha). En tu proxy, captura la request HTTP:
+                            </p>
+                            <div class="code-block" style="font-size: 0.75rem;">
+GET /rest/basket/<span style="color: #fbbf24;">7</span> HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer eyJhbGc...
+Cookie: token=eyJhbGc...</div>
+                            <p style="font-size: 0.875rem; color: #475569; line-height: 1.6; margin-top: 0.75rem;">
+                                Observa el ID del carrito en la URL (en este ejemplo: <strong>7</strong>). Este es un simple Integer que se puede adivinar fácilmente.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: flex-start; margin-bottom: 2rem;">
+                        <div class="step-number">4</div>
+                        <div style="flex: 1;">
+                            <h5 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.75rem;">
+                                Brute Force del Basket ID
+                            </h5>
+                            <p style="font-size: 0.875rem; color: #475569; line-height: 1.6; margin-bottom: 0.75rem;">
+                                En Burp Suite, envía la request al <strong>Intruder</strong>. En OWASP ZAP, usa el <strong>Fuzzer</strong>.
+                            </p>
+                            <div style="background: #fef3c7; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                                <p style="font-size: 0.875rem; margin: 0;"><strong>Configuración del Attack:</strong></p>
+                                <ul style="font-size: 0.875rem; margin: 0.5rem 0; padding-left: 1.5rem;">
+                                    <li>Posición del payload: el ID del carrito en la URL</li>
+                                    <li>Tipo de payload: Numbers (secuencial)</li>
+                                    <li>Rango: 0 - 50 (o más, dependiendo)</li>
+                                    <li>Thread count: 5-10 para velocidad moderada</li>
+                                </ul>
+                            </div>
+                            <div class="code-block" style="font-size: 0.75rem;">
+GET /rest/basket/<span style="color: #10b981;">§1§</span> HTTP/1.1
+<span style="color: #64748b;">// Burp Intruder reemplazará §1§ con: 1, 2, 3, 4, ..., 50</span></div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: flex-start; margin-bottom: 2rem;">
+                        <div class="step-number">5</div>
+                        <div style="flex: 1;">
+                            <h5 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.75rem;">
+                                Analizar Respuestas Exitosas
+                            </h5>
+                            <p style="font-size: 0.875rem; color: #475569; line-height: 1.6; margin-bottom: 0.75rem;">
+                                Filtra las respuestas con código HTTP <strong>200 OK</strong>. Verás carritos de otros usuarios:
+                            </p>
+                            <div class="code-block" style="font-size: 0.75rem;">
+{
+  "status": "success",
+  "data": {
+    "id": <span style="color: #fbbf24;">3</span>,
+    "Products": [
+      {
+        "name": "Apple Juice (1000ml)",
+        "price": 1.99,
+        "quantity": 5
+      },
+      {
+        "name": "Banana Juice (1000ml)",  
+        "price": 1.49,
+        "quantity": 2
+      }
+    ]
+  }
+}</div>
+                            <p style="font-size: 0.875rem; color: #ef4444; line-height: 1.6; margin-top: 0.75rem; font-weight: 600;">
+                                <i class="fas fa-exclamation-circle"></i> ¡Acabas de acceder a datos privados de otro usuario sin autorización!
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: flex-start; margin-bottom: 2rem;">
+                        <div class="step-number">6</div>
+                        <div style="flex: 1;">
+                            <h5 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.75rem;">
+                                Escalación: Modificar Carritos Ajenos
+                            </h5>
+                            <p style="font-size: 0.875rem; color: #475569; line-height: 1.6; margin-bottom: 0.75rem;">
+                                Una vez que conoces el ID de otro carrito, puedes intentar modificarlo con una request PATCH o DELETE:
+                            </p>
+                            <div class="code-block" style="font-size: 0.75rem;">
+DELETE /rest/basket/<span style="color: #f87171;">3</span>/products HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer [tu_token]
+
+<span style="color: #64748b;">// O para agregar productos al carrito ajeno:</span>
+POST /api/BasketItems/ HTTP/1.1
+Content-Type: application/json
+
+{
+  "BasketId": "<span style="color: #f87171;">3</span>",
+  "ProductId": 5,
+  "quantity": 100
+}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert-danger">
+                    <h4 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.75rem;">
+                        <i class="fas fa-bug"></i> ¿Por qué funciona este ataque?
+                    </h4>
+                    <ul style="margin: 0; padding-left: 1.5rem; font-size: 0.875rem; line-height: 1.6;">
+                        <li><strong>No hay validación de propiedad:</strong> La API no verifica que el basket ID pertenezca al usuario autenticado</li>
+                        <li><strong>IDs predecibles:</strong> Usar enteros secuenciales facilita la enumeración</li>
+                        <li><strong>Confianza en el cliente:</strong> La aplicación asume que el usuario solo accederá a sus propios recursos</li>
+                        <li><strong>Falta de autorización granular:</strong> Autenticación ≠ Autorización</li>
+                    </ul>
+                </div>
+
+                <div class="alert-success" style="margin-top: 2rem;">
+                    <h4 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.75rem;">
+                        <i class="fas fa-check-circle"></i> Remediation
+                    </h4>
+                    <p style="margin: 0; font-size: 0.875rem; line-height: 1.6;">
+                        <strong>La solución correcta:</strong> Implementar verificación de propiedad en el backend. Cada endpoint debe validar que el recurso solicitado pertenece al usuario autenticado antes de devolver o modificar datos. Ejemplo en código: <code style="background: #1e293b; color: #e2e8f0; padding: 0.25rem 0.5rem; border-radius: 4px;">if (basket.userId !== currentUser.id) return 403</code>
+                    </p>
+                    <p style="margin-top: 0.75rem; font-size: 0.875rem;">
+                        Referencia: <a href="https://thehackerish.com/idor-tutorial-hands-on-owasp-top-10-training/" class="reference-link" target="_blank">IDOR Tutorial - The Hackerish</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 6: Hardening Checklist -->
+        <div class="section">
+            <div class="section-header">
+                <i class="fas fa-shield-alt"></i>
+                <h2 style="font-size: 2rem; font-weight: 700; margin: 0;">Checklist de Hardening: Remediación de Arquitectura</h2>
+            </div>
+
+            <div class="alert-warning" style="margin-bottom: 2rem;">
+                <h4 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.75rem;">
+                    <i class="fas fa-quote-left"></i> Principio Fundamental
+                </h4>
+                <p style="font-size: 1.125rem; font-weight: 600; margin: 0; line-height: 1.6;">
+                    "Sanitizar entradas NO corrige lógica rota"
+                </p>
+                <p style="font-size: 0.875rem; margin-top: 0.75rem; line-height: 1.6;">
+                    Puedes validar cada input, escapar cada string, y usar prepared statements, pero si tu <strong>lógica de negocio</strong> permite que un usuario realice acciones fuera de sus permisos, la aplicación sigue siendo vulnerable. El control de acceso debe estar integrado en el <strong>diseño</strong>, no agregado como capa de sanitización.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 2rem;">
+                    <i class="fas fa-tasks"></i> Checklist de Verificación (10 Puntos Críticos)
+                </h3>
+
+                <div class="checklist-item">
+                    <input type="checkbox" id="check1">
+                    <label for="check1" style="flex: 1; cursor: pointer;">
+                        <strong>1. Deny by Default</strong><br>
+                        <span style="font-size: 0.875rem; color: #64748b;">
+                            Todos los recursos deben requerir autorización explícita. Solo los recursos públicos (landing page, docs) deben ser accesibles sin autenticación. Implementa un middleware que verifique permisos en CADA endpoint.
+                        </span>
+                    </label>
+                </div>
+
+                <div class="checklist-item">
+                    <input type="checkbox" id="check2">
+                    <label for="check2" style="flex: 1; cursor: pointer;">
+                        <strong>2. Control de Acceso en Server-Side</strong><br>
+                        <span style="font-size: 0.875rem; color: #64748b;">
+                            NUNCA confíes en validaciones del cliente (JavaScript, hidden fields, disabled buttons). Todo control de acceso debe ejecutarse en el backend, donde el atacante no puede modificarlo. Usa código de confianza: servidor o serverless API.
+                        </span>
+                    </label>
+                </div>
+
+                <div class="checklist-item">
+                    <input type="checkbox" id="check3">
+                    <label for="check3" style="flex: 1; cursor: pointer;">
+                        <strong>3. Validar Propiedad de Recursos</strong><br>
+                        <span style="font-size: 0.875rem; color: #64748b;">
+                            Antes de devolver o modificar cualquier recurso, verifica que pertenece al usuario autenticado. Implementa: <code style="background: #f3f4f6; padding: 0.125rem 0.5rem; border-radius: 4px;">if (resource.ownerId !== currentUser.id) throw Forbidden()</code>
+                        </span>
+                    </label>
+                </div>
+
+                <div class="checklist-item">
+                    <input type="checkbox" id="check4">
+                    <label for="check4" style="flex: 1; cursor: pointer;">
+                        <strong>4. UUIDs en Lugar de IDs Secuenciales</strong><br>
+                        <span style="font-size: 0.875rem; color: #64748b;">
+                            Para recursos sensibles, usa identificadores no predecibles (UUIDs v4: <code style="background: #f3f4f6; padding: 0.125rem 0.5rem; border-radius: 4px;">550e8400-e29b-41d4-a716-446655440000</code>) en lugar de integers secuenciales. Esto dificulta la enumeración, pero NO reemplaza la validación de autorización.
+                        </span>
+                    </label>
+                </div>
+
+                <div class="checklist-item">
+                    <input type="checkbox" id="check5">
+                    <label for="check5" style="flex: 1; cursor: pointer;">
+                        <strong>5. Validar TODOS los Métodos HTTP</strong><br>
+                        <span style="font-size: 0.875rem; color: #64748b;">
+                            No solo GET, también POST, PUT, PATCH, DELETE. Muchas APIs olvidan proteger métodos de escritura. Verifica permisos antes de CUALQUIER operación CRUD. Deshabilita métodos HTTP innecesarios en el servidor web.
+                        </span>
+                    </label>
+                </div>
+
+                <div class="checklist-item">
+                    <input type="checkbox" id="check6">
+                    <label for="check6" style="flex: 1; cursor: pointer;">
+                        <strong>6. Rate Limiting y Throttling</strong><br>
+                        <span style="font-size: 0.875rem; color: #64748b;">
+                            Implementa límites de tasa en APIs críticas para prevenir enumeración automatizada y ataques de fuerza bruta. Ejemplo: máximo 100 requests por minuto por IP para endpoints de autenticación.
+                        </span>
+                    </label>
+                </div>
+
+                <div class="checklist-item">
+                    <input type="checkbox" id="check7">
+                    <label for="check7" style="flex: 1; cursor: pointer;">
+                        <strong>7. Logging y Monitoreo de Accesos</strong><br>
+                        <span style="font-size: 0.875rem; color: #64748b;">
+                            Registra TODOS los fallos de control de acceso (código 403). Implementa alertas automáticas para: intentos de acceso a recursos ajenos, patrones de enumeración, elevación de privilegios. Integra con SIEM.
+                        </span>
+                    </label>
+                </div>
+
+                <div class="checklist-item">
+                    <input type="checkbox" id="check8">
+                    <label for="check8" style="flex: 1; cursor: pointer;">
+                        <strong>8. JWT con Tiempo de Vida Corto</strong><br>
+                        <span style="font-size: 0.875rem; color: #64748b;">
+                            Si usas tokens stateless (JWT), configura expiración corta (15-30 minutos) y usa refresh tokens. Invalida tokens en el servidor tras logout. Considera OAuth 2.0 para revocación efectiva.
+                        </span>
+                    </label>
+                </div>
+
+                <div class="checklist-item">
+                    <input type="checkbox" id="check9">
+                    <label for="check9" style="flex: 1; cursor: pointer;">
+                        <strong>9. Minimizar Configuración CORS</strong><br>
+                        <span style="font-size: 0.875rem; color: #64748b;">
+                            NO uses <code style="background: #f3f4f6; padding: 0.125rem 0.5rem; border-radius: 4px;">Access-Control-Allow-Origin: *</code> en producción. Define explícitamente los orígenes permitidos. Restringe métodos y headers permitidos.
+                        </span>
+                    </label>
+                </div>
+
+                <div class="checklist-item">
+                    <input type="checkbox" id="check10">
+                    <label for="check10" style="flex: 1; cursor: pointer;">
+                        <strong>10. Testing Automatizado de Autorización</strong><br>
+                        <span style="font-size: 0.875rem; color: #64748b;">
+                            Crea tests que verifiquen: usuarios no autenticados no pueden acceder a recursos protegidos, usuarios estándar no pueden acceder a funciones admin, usuarios no pueden ver/modificar recursos ajenos. Ejecuta en CI/CD.
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="alert-success" style="margin-top: 2rem;">
+                <h4 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.75rem;">
+                    <i class="fas fa-book"></i> Referencias Adicionales
+                </h4>
+                <ul style="margin: 0; padding-left: 1.5rem; font-size: 0.875rem; line-height: 1.8;">
+                    <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html" class="reference-link" target="_blank">OWASP Authorization Cheat Sheet</a></li>
+                    <li><a href="https://top10proactive.owasp.org/archive/2024/the-top-10/c1-accesscontrol/" class="reference-link" target="_blank">OWASP Proactive Controls - Access Control</a></li>
+                    <li><a href="https://owasp.org/Top10/2025/A01_2025-Broken_Access_Control/" class="reference-link" target="_blank">OWASP Top 10:2025 - A01 Broken Access Control</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 7: CVEs de 2025 -->
+        <div class="section" style="background: #f8fafc;">
+            <div class="section-header">
+                <i class="fas fa-exclamation-circle"></i>
+                <h2 style="font-size: 2rem; font-weight: 700; margin: 0;">Noticias Actuales: CVEs de 2025</h2>
+            </div>
+
+            <div class="alert-info" style="margin-bottom: 2rem;">
+                <p style="margin: 0; font-size: 1rem; line-height: 1.6;">
+                    <strong><i class="fas fa-chart-line"></i> Contexto 2025:</strong> Este año está en camino de establecer un récord histórico de vulnerabilidades reportadas, con más de 21,000 CVEs divulgados solo en el primer semestre. Esto representa aproximadamente 133 nuevos CVEs por día.
+                </p>
+            </div>
+
+            <!-- CVE 1: CVE-2025-13932 -->
+            <div class="cve-card">
+                <div class="cve-header">
+                    <i class="fas fa-bug"></i> CVE-2025-13932
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <span class="severity-badge severity-high">HIGH SEVERITY</span>
+                    <span class="severity-badge" style="background: #3b82f6;">IDOR</span>
+                    <span class="severity-badge" style="background: #8b5cf6;">Broken Access Control</span>
+                </div>
+
+                <h4 style="font-size: 1.25rem; font-weight: 700; margin: 1.5rem 0 1rem 0;">
+                    SolisCloud API - Insecure Direct Object Reference
+                </h4>
+
+                <div style="background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
+                    <p style="font-size: 0.875rem; margin-bottom: 0.5rem;">
+                        <strong>Producto Afectado:</strong> SolisCloud Monitoring Platform API
+                    </p>
+                    <p style="font-size: 0.875rem; margin-bottom: 0.5rem;">
+                        <strong>Tipo de Vulnerabilidad:</strong> Broken Access Control (A01:2025)
+                    </p>
+                    <p style="font-size: 0.875rem; margin-bottom: 0;">
+                        <strong>Vector de Ataque:</strong> Manipulación de parámetros en API REST
+                    </p>
+                </div>
+
+                <h5 style="font-weight: 700; margin: 1.5rem 0 0.75rem 0; font-size: 1.125rem;">
+                    <i class="fas fa-search"></i> Descripción Técnica
+                </h5>
+                <p style="font-size: 0.875rem; line-height: 1.6; margin-bottom: 1rem;">
+                    La API de SolisCloud sufre de una vulnerabilidad de Broken Access Control, específicamente un IDOR (Insecure Direct Object Reference), donde cualquier usuario autenticado puede acceder a información detallada de plantas solares de otros usuarios simplemente modificando el parámetro <code style="background: rgba(255,255,255,0.2); padding: 0.25rem 0.5rem; border-radius: 4px;">plantId</code> en las requests de la API.
+                </p>
+
+                <h5 style="font-weight: 700; margin: 1.5rem 0 0.75rem 0; font-size: 1.125rem;">
+                    <i class="fas fa-crosshairs"></i> Impacto
+                </h5>
+                <ul style="font-size: 0.875rem; line-height: 1.8; margin: 0; padding-left: 1.5rem;">
+                    <li>Un atacante con autenticación de bajo privilegio puede ver información sensible de <strong>cualquier planta</strong> en el sistema</li>
+                    <li>Exposición de datos confidenciales: ubicación geográfica, capacidad de generación, configuración técnica</li>
+                    <li>Potencial para mapear infraestructura energética crítica</li>
+                    <li>Violación de privacidad de clientes empresariales</li>
+                </ul>
+
+                <h5 style="font-weight: 700; margin: 1.5rem 0 0.75rem 0; font-size: 1.125rem;">
+                    <i class="fas fa-code"></i> Ejemplo de Explotación
+                </h5>
+                <div class="code-block" style="background: #0f172a; font-size: 0.75rem;">
+<span style="color: #64748b;">// Request legítimo del usuario autenticado</span>
+GET /api/v1/plant/<span style="color: #10b981;">user_plant_id_123</span> HTTP/1.1
+Authorization: Bearer [token_usuario]
+
+<span style="color: #64748b;">// Request maliciosa - simplemente cambia el ID</span>
+GET /api/v1/plant/<span style="color: #f87171;">victim_plant_id_456</span> HTTP/1.1
+Authorization: Bearer [token_usuario]
+
+<span style="color: #64748b;">// Respuesta exitosa con datos de la víctima:</span>
+{
+  "plantId": "victim_plant_id_456",
+  "owner": "Empresa Víctima S.A.",
+  "location": {"lat": 40.4168, "lng": -3.7038},
+  "capacity": "5.2 MW",
+  "dailyProduction": "28,450 kWh",
+  "installedPanels": 15000
+}</div>
+
+                <div style="background: #991b1b; padding: 1.25rem; border-radius: 8px; margin-top: 1.5rem;">
+                    <p style="margin: 0; font-size: 0.875rem; font-weight: 600;">
+                        <i class="fas fa-shield-alt"></i> Este CVE es un ejemplo perfecto de cómo el A01:2025 (Broken Access Control) sigue siendo la vulnerabilidad #1 del OWASP Top 10, afectando incluso a sistemas IoT y plataformas de monitoreo críticas.
+                    </p>
+                </div>
+
+                <p style="font-size: 0.75rem; margin-top: 1rem; opacity: 0.8;">
+                    Referencias: 
+                    <a href="https://nvd.nist.gov/vuln/detail/CVE-2025-13932" style="color: #93c5fd;" target="_blank">NVD</a> | 
+                    <a href="https://www.cve.org/CVERecord?id=CVE-2025-13932" style="color: #93c5fd;" target="_blank">CVE Record</a> | 
+                    <a href="https://github.com/advisories/GHSA-rj4p-qc9g-j2p3" style="color: #93c5fd;" target="_blank">GitHub Advisory</a>
+                </p>
+            </div>
+
+            <!-- CVE 2: CVE-2025-0108 & CVE-2025-4615 -->
+            <div class="cve-card" style="background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);">
+                <div class="cve-header">
+                    <i class="fas fa-fire"></i> CVE-2025-0108 & CVE-2025-4615
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <span class="severity-badge severity-critical">CRITICAL SEVERITY</span>
+                    <span class="severity-badge" style="background: #dc2626;">Authentication Bypass</span>
+                    <span class="severity-badge" style="background: #f59e0b;">RCE</span>
+                </div>
+
+                <h4 style="font-size: 1.25rem; font-weight: 700; margin: 1.5rem 0 1rem 0;">
+                    Palo Alto Networks PAN-OS - Chain Authentication Bypass to Root RCE
+                </h4>
+
+                <div style="background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
+                    <p style="font-size: 0.875rem; margin-bottom: 0.5rem;">
+                        <strong>Producto Afectado:</strong> Palo Alto Networks PAN-OS (Management Interface)
+                    </p>
+                    <p style="font-size: 0.875rem; margin-bottom: 0.5rem;">
+                        <strong>Tipo de Vulnerabilidad:</strong> Authentication Bypass + Command Injection
+                    </p>
+                    <p style="font-size: 0.875rem; margin-bottom: 0;">
+                        <strong>Vector de Ataque:</strong> Network-based, no requiere autenticación
+                    </p>
+                </div>
+
+                <h5 style="font-weight: 700; margin: 1.5rem 0 0.75rem 0; font-size: 1.125rem;">
+                    <i class="fas fa-skull-crossbones"></i> Descripción Técnica
+                </h5>
+                <p style="font-size: 0.875rem; line-height: 1.6; margin-bottom: 1rem;">
+                    Este es un ataque de <strong>cadena de explotación</strong> donde dos vulnerabilidades se combinan para lograr compromiso total del sistema. Un atacante NO autenticado puede:
+                </p>
+                <ol style="font-size: 0.875rem; line-height: 1.8; margin: 0.5rem 0; padding-left: 1.5rem;">
+                    <li><strong>CVE-2025-0108:</strong> Bypassear el mecanismo de autenticación de la interfaz web de gestión</li>
+                    <li><strong>CVE-2025-4615:</strong> Una vez dentro, ejecutar comandos arbitrarios con privilegios root</li>
+                </ol>
+
+                <h5 style="font-weight: 700; margin: 1.5rem 0 0.75rem 0; font-size: 1.125rem;">
+                    <i class="fas fa-bomb"></i> Impacto Crítico
+                </h5>
+                <ul style="font-size: 0.875rem; line-height: 1.8; margin: 0; padding-left: 1.5rem;">
+                    <li><strong>Compromiso total del firewall:</strong> Un atacante obtiene acceso root completo</li>
+                    <li><strong>Bypassing de perímetro:</strong> El firewall que protege la red se convierte en punto de entrada</li>
+                    <li><strong>Pivoting:</strong> Desde el firewall comprometido, acceso a redes internas</li>
+                    <li><strong>Persistencia:</strong> Instalación de backdoors en infraestructura crítica</li>
+                    <li><strong>Robo de configuración:</strong> Acceso a reglas de firewall, VPN configs, credenciales</li>
+                </ul>
+
+                <h5 style="font-weight: 700; margin: 1.5rem 0 0.75rem 0; font-size: 1.125rem;">
+                    <i class="fas fa-exclamation-triangle"></i> ¿Por Qué Es Relevante para Esta Clase?
+                </h5>
+                <div style="background: rgba(0,0,0,0.3); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #fbbf24;">
+                    <p style="font-size: 0.875rem; line-height: 1.6; margin: 0;">
+                        Este CVE demuestra perfectamente el concepto de <strong>"La red controla quién entra, la aplicación controla qué puede hacer"</strong>. Palo Alto es uno de los firewalls empresariales más utilizados del mundo, diseñado específicamente para controlar el perímetro de red. Sin embargo, una falla en la <strong>lógica de autenticación de su interfaz de gestión</strong> (la aplicación web) permitió a atacantes bypassear completamente las protecciones de red.
+                    </p>
+                    <p style="font-size: 0.875rem; line-height: 1.6; margin-top: 0.75rem;">
+                        <strong>Lección:</strong> No importa cuán robusto sea tu firewall, WAF o VPN si la aplicación web que lo gestiona tiene fallas de autenticación o autorización. El perímetro de red es inútil si el adversario puede manipular la lógica de la aplicación.
+                    </p>
+                </div>
+
+                <p style="font-size: 0.75rem; margin-top: 1.5rem; opacity: 0.8;">
+                    Referencias: 
+                    <a href="https://www.action1.com/blog/top-10-cybersecurity-vulnerabilities-in-2025-and-why-they-still-matter/" style="color: #fecaca;" target="_blank">Action1 Report</a>
+                </p>
+            </div>
+
+            <!-- Breaches adicionales de 2025 -->
+            <div class="card">
+                <h3 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 1.5rem;">
+                    <i class="fas fa-newspaper"></i> Otras Brechas Destacadas de 2025
+                </h3>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                    <div style="background: #fef2f2; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #dc2626;">
+                        <h4 style="font-weight: 700; margin-bottom: 0.75rem; font-size: 1.125rem;">
+                            <i class="fas fa-cloud"></i> Salesforce Integrations
+                        </h4>
+                        <p style="font-size: 0.875rem; line-height: 1.6; color: #7f1d1d;">
+                            Atacantes comprometieron integraciones de terceros (Gainsight, Salesloft Drift), no Salesforce directamente. <strong>Scattered Lapsus$ Hunters</strong> robó datos de Google Workspace, Cloudflare, TransUnion (4.4M registros con SSN). Lección: tus integraciones SaaS son superficie de ataque.
+                        </p>
+                        <p style="font-size: 0.75rem; margin-top: 0.5rem;">
+                            Fuente: <a href="https://www.wired.com/story/worst-hacks-of-2025/" class="reference-link" target="_blank">Wired - Worst Hacks 2025</a>
+                        </p>
+                    </div>
+
+                    <div style="background: #fef3c7; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <h4 style="font-weight: 700; margin-bottom: 0.75rem; font-size: 1.125rem;">
+                            <i class="fas fa-database"></i> Clop's Oracle E-Business Suite
+                        </h4>
+                        <p style="font-size: 0.875rem; line-height: 1.6; color: #78350f;">
+                            El grupo <strong>Clop</strong> explotó un zero-day en Oracle E-Business Suite para robo masivo de datos. Víctimas incluyen The Washington Post, University of Pennsylvania, y múltiples hospitales. Explotación antes del patch (Oct 4, 2025). Extorsión de millones de dólares.
+                        </p>
+                        <p style="font-size: 0.75rem; margin-top: 0.5rem;">
+                            CVE: <a href="https://www.miggo.io/post/cve-2025-61882-the-cl0p-gang-targets-oracle-e-business-suite" class="reference-link" target="_blank">CVE-2025-61882</a>
+                        </p>
+                    </div>
+
+                    <div style="background: #eff6ff; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                        <h4 style="font-weight: 700; margin-bottom: 0.75rem; font-size: 1.125rem;">
+                            <i class="fas fa-university"></i> University Breaches
+                        </h4>
+                        <p style="font-size: 0.875rem; line-height: 1.6; color: #1e3a8a;">
+                            Harvard, Princeton, y UPenn sufrieron <strong>ataques de phishing telefónico</strong> (vishing) que comprometieron sistemas de Alumni Affairs. Datos expuestos: información de donantes, eventos, contactos de décadas. Los ataques empezaron con llamadas simulando soporte técnico.
+                        </p>
+                        <p style="font-size: 0.75rem; margin-top: 0.5rem;">
+                            Fuente: <a href="https://www.wired.com/story/worst-hacks-of-2025/" class="reference-link" target="_blank">Wired</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 8: Conclusiones -->
+        <div class="section" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white;">
+            <h2 style="font-size: 2rem; font-weight: 700; margin-bottom: 2rem; text-align: center;">
+                <i class="fas fa-lightbulb"></i> Conclusiones y Próximos Pasos
+            </h2>
+
+            <div style="background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 12px; margin-bottom: 2rem;">
+                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;">
+                    <i class="fas fa-check-circle"></i> Lo que hemos aprendido
+                </h3>
+                <ul style="font-size: 1rem; line-height: 1.8; padding-left: 1.5rem; margin: 0;">
+                    <li><strong>El control de red ≠ seguridad de aplicación:</strong> WAF, firewalls y VPNs no previenen fallas de lógica de negocio</li>
+                    <li><strong>100% de aplicaciones vulnerables:</strong> Broken Access Control es universal y crítico</li>
+                    <li><strong>Sanitización no es suficiente:</strong> Debes diseñar control de acceso en la arquitectura, no como parche</li>
+                    <li><strong>IDOR es explotable en minutos:</strong> La validación de propiedad de recursos es mandatoria</li>
+                    <li><strong>Las integraciones SaaS son vectores:</strong> Audita a tus proveedores terceros</li>
+                </ul>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 12px;">
+                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;">
+                    <i class="fas fa-tasks"></i> Tareas Recomendadas
+                </h3>
+                <ol style="font-size: 1rem; line-height: 1.8; padding-left: 1.5rem; margin: 0;">
+                    <li><strong>Completa el laboratorio Juice Shop:</strong> Explota al menos 5 challenges diferentes de IDOR</li>
+                    <li><strong>Audita una aplicación propia:</strong> Usa la checklist de hardening para identificar gaps</li>
+                    <li><strong>Configura logging:</strong> Implementa alertas para intentos de acceso no autorizado (HTTP 403)</li>
+                    <li><strong>Lee el OWASP Top 10:2025 completo:</strong> No te quedes solo en A01</li>
+                    <li><strong>Practica threat modeling:</strong> Dibuja diagramas de flujo de datos e identifica puntos de control de acceso</li>
+                </ol>
+            </div>
+
+            <div style="text-align: center; margin-top: 3rem; padding-top: 2rem; border-top: 2px solid rgba(255,255,255,0.2);">
+                <p style="font-size: 1.125rem; margin-bottom: 1rem;">
+                    <strong>Recursos Adicionales</strong>
+                </p>
+                <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                    <a href="https://owasp.org/Top10/2025/" style="background: white; color: #1e3c72; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;" target="_blank">
+                        <i class="fas fa-book"></i> OWASP Top 10:2025
+                    </a>
+                    <a href="https://github.com/juice-shop/juice-shop" style="background: white; color: #1e3c72; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;" target="_blank">
+                        <i class="fab fa-github"></i> Juice Shop
+                    </a>
+                    <a href="https://cheatsheetseries.owasp.org/" style="background: white; color: #1e3c72; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;" target="_blank">
+                        <i class="fas fa-file-alt"></i> Cheat Sheets
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="background: #1e293b; color: white; padding: 2rem; text-align: center;">
+            <p style="margin: 0; font-size: 0.875rem;">
+                <strong>Taller Interactivo: Clase 10 - Seguridad Web</strong>
+            </p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.75rem; opacity: 0.7;">
+                Basado en OWASP Top 10:2025 | Material educativo | 2026
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const answers = {
+            1: {
+                correct: 'implementacion',
+                feedback: {
+                    'implementacion': {
+                        correct: true,
+                        message: '¡Correcto! Este es un fallo de IMPLEMENTACIÓN. El desarrollador escribió código vulnerable al concatenar strings directamente en una query SQL. La solución es usar prepared statements o queries parametrizadas. Es un error en cómo se escribió el código, no en el diseño arquitectónico ni en la configuración del servidor.'
+                    },
+                    'configuracion': {
+                        correct: false,
+                        message: 'Incorrecto. Un fallo de CONFIGURACIÓN sería, por ejemplo, tener el puerto de base de datos expuesto públicamente o usar credenciales por defecto. En este caso, el problema está en el código mismo, no en cómo está configurado el entorno.'
+                    },
+                    'diseno': {
+                        correct: false,
+                        message: 'Incorrecto. Un fallo de DISEÑO sería, por ejemplo, que la arquitectura permita que múltiples usuarios compartan el mismo email (como en el caso del WAF bypass). Aquí el problema es específicamente cómo se implementó la query SQL.'
+                    }
+                }
+            },
+            2: {
+                correct: 'diseno',
+                feedback: {
+                    'implementacion': {
+                        correct: false,
+                        message: 'Incorrecto. El código que devuelve la factura puede estar bien implementado. El problema es más profundo: la arquitectura NO considera que los usuarios solo deben acceder a sus propios recursos. Es un problema de diseño del sistema, no del código específico.'
+                    },
+                    'configuracion': {
+                        correct: false,
+                        message: 'Incorrecto. La configuración del servidor (HTTPS, headers, etc.) puede ser perfecta. El problema es que el sistema fue diseñado sin considerar validación de propiedad de recursos desde el inicio.'
+                    },
+                    'diseno': {
+                        correct: true,
+                        message: '¡Correcto! Este es un fallo de DISEÑO. El sistema fue arquitectado sin considerar que debe validar la PROPIEDAD de recursos. Usar IDs secuenciales es un indicador, pero el problema real es que no hay un principio arquitectónico que diga "antes de devolver data, verifica que pertenece al usuario". Esto debe estar en el diseño desde el inicio, no agregarse después como parche.'
+                    }
+                }
+            },
+            3: {
+                correct: 'configuracion',
+                feedback: {
+                    'implementacion': {
+                        correct: false,
+                        message: 'Incorrecto. El código de autenticación está bien implementado (usa bcrypt, prepared statements). No hay un error en el código. El problema es que NO se configuraron las herramientas de monitoreo, logging, y alertas.'
+                    },
+                    'configuracion': {
+                        correct: true,
+                        message: '¡Correcto! Este es un fallo de CONFIGURACIÓN. El sistema tiene las capacidades de logging y monitoreo disponibles, pero NO fueron configuradas o activadas. Falta: integrar con SIEM, configurar alertas, activar rate limiting, establecer thresholds de alerta. Es un problema operacional, no de código ni de diseño arquitectónico.'
+                    },
+                    'diseno': {
+                        correct: false,
+                        message: 'Incorrecto. El diseño del sistema puede incluir logging adecuado. El problema es que esas capacidades no están configuradas o activadas en producción. No necesitas rediseñar el sistema, solo configurarlo correctamente.'
+                    }
+                }
+            }
+        };
+
+        function checkAnswer(scenario, selected, button) {
+            const feedback = answers[scenario].feedback[selected];
+            const feedbackDiv = document.getElementById('feedback' + scenario);
+            const buttons = button.parentElement.querySelectorAll('.btn-option');
+            
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.style.cursor = 'default';
+            });
+            
+            if (feedback.correct) {
+                button.classList.add('correct');
+                feedbackDiv.innerHTML = `
+                    <div style="background: #f0fdf4; border: 2px solid #10b981; padding: 1.5rem; border-radius: 8px;">
+                        <h4 style="color: #065f46; font-weight: 700; margin-bottom: 0.75rem;">
+                            <i class="fas fa-check-circle"></i> ¡Respuesta Correcta!
+                        </h4>
+                        <p style="color: #065f46; margin: 0; line-height: 1.6;">${feedback.message}</p>
+                    </div>
+                `;
+            } else {
+                button.classList.add('incorrect');
+                feedbackDiv.innerHTML = `
+                    <div style="background: #fef2f2; border: 2px solid #ef4444; padding: 1.5rem; border-radius: 8px;">
+                        <h4 style="color: #991b1b; font-weight: 700; margin-bottom: 0.75rem;">
+                            <i class="fas fa-times-circle"></i> Respuesta Incorrecta
+                        </h4>
+                        <p style="color: #991b1b; margin: 0; line-height: 1.6;">${feedback.message}</p>
+                    </div>
+                `;
+            }
+            
+            feedbackDiv.style.display = 'block';
+        }
+
+        // Track checklist progress
+        let completedItems = 0;
+        const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    completedItems++;
+                    this.parentElement.style.background = '#f0fdf4';
+                    this.parentElement.style.borderColor = '#10b981';
+                } else {
+                    completedItems--;
+                    this.parentElement.style.background = 'white';
+                    this.parentElement.style.borderColor = '#e5e7eb';
+                }
+                
+                if (completedItems === 10) {
+                    alert('🎉 ¡Felicitaciones! Has completado toda la checklist de hardening. Ahora es momento de aplicar estos controles en tus propias aplicaciones.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
